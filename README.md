@@ -1,21 +1,163 @@
-编译说明
+# 云文件系统后端服务
+
+## 项目简介
+
+云文件系统后端服务是一个基于C++11开发的现代化文件存储与分享平台后端，支持文件上传、管理、分享和下载等功能。该系统采用多线程架构，结合MySQL和Redis进行数据存储，并使用FastDFS作为分布式文件存储系统，为前端提供高性能、可扩展的API服务。
+
+## 主要功能
+
+- **用户认证与管理**：支持用户注册、登录和个人信息管理
+- **文件上传与存储**：支持多种格式文件上传，使用FastDFS进行分布式存储
+- **文件管理**：用户可以查看、删除个人上传的文件
+- **文件分享**：生成分享链接和提取码，实现文件的安全分享
+- **下载统计**：记录和展示文件下载次数，提供热门文件排行榜
+- **缓存管理**：使用Redis进行缓存优化，提高系统性能
+
+## 技术架构
+
+### 后端技术栈
+- **编程语言**：C++11
+- **网络库**：自定义网络库（基于epoll实现）
+- **数据库**：MySQL（主从配置）
+- **缓存**：Redis
+- **文件存储**：FastDFS
+- **HTTP解析**：http_parser
+- **JSON处理**：JsonCpp
+- **日志系统**：自定义异步日志系统
+- **线程池**：自定义线程池实现
+
+### 系统架构
+
+系统采用经典的C/S架构，主要包含以下模块：
+1. **网络模块**：基于epoll的I/O多路复用，处理HTTP请求
+2. **业务逻辑模块**：处理各种API请求，包括用户认证、文件上传、分享等功能
+3. **数据存储模块**：通过连接池与MySQL和Redis交互，实现数据持久化和缓存
+4. **文件存储模块**：通过FastDFS API实现文件的分布式存储和管理
+
+## 项目结构
+
+```
+CloudFile_Server/
+├── api/                  # API处理模块
+│   ├── ApiCommon.h/cpp   # 公共API函数
+│   ├── ApiLogin.h/cpp    # 用户登录API
+│   ├── ApiRegister.h/cpp # 用户注册API
+│   ├── ApiUpload.h/cpp   # 文件上传API
+│   ├── ApiMyfiles.h/cpp  # 用户文件管理API
+│   ├── ApiSharefiles.h/cpp # 文件分享API
+│   ├── ApiDealfile.h/cpp # 文件处理API
+│   └── ApiDealsharefile.h/cpp # 分享文件处理API
+├── base/                 # 基础库模块
+│   ├── BaseSocket.h/cpp  # 基础Socket类
+│   ├── Common.h/cpp      # 公共函数和宏
+│   ├── ConfigFileReader.h/cpp # 配置文件读取
+│   ├── EventDispatch.h/cpp # 事件分发
+│   ├── HttpConn.h/cpp    # HTTP连接处理
+│   ├── HttpParserWrapper.h/cpp # HTTP解析器封装
+│   ├── Lock.h/cpp        # 锁机制
+│   ├── ThreadPool.h/cpp  # 线程池
+│   ├── UtilPdu.h/cpp     # 工具函数
+│   ├── netlib.h/cpp      # 网络库
+│   └── util.h/cpp        # 通用工具函数
+├── jsoncpp/              # JSON处理库
+├── mysql/                # MySQL连接池
+│   └── DBPool.h/cpp      # 数据库连接池
+├── redis/                # Redis客户端库
+│   └── CachePool.h/cpp   # Redis连接池
+├── main.cpp              # 主程序入口
+├── tc_http_server.conf   # 配置文件
+├── nginx.conf            # Nginx配置文件
+└── 0voice_tuchuang.sql   # 数据库结构文件
+```
+
+## 数据库设计
+
+系统使用MySQL作为主数据库，包含以下主要表：
+
+1. **user_info**：用户信息表，存储用户名、昵称、密码等基本信息
+2. **file_info**：文件信息表，存储文件的MD5、ID、URL、大小、类型等信息
+3. **user_file_list**：用户文件列表，记录用户拥有的文件
+4. **user_file_count**：用户文件计数表，统计用户拥有的文件数量
+5. **share_file_list**：共享文件列表，记录被用户分享的文件
+6. **share_picture_list**：分享图片列表，记录图片分享信息，包含提取码
+
+## 编译与安装
+
+### 环境要求
+- Linux操作系统（推荐Ubuntu/CentOS）
+- CMake 3.0+
+- GCC 4.8+ 或 Clang 3.4+
+- MySQL 5.6+
+- Redis 3.0+
+- FastDFS
+
+### 编译步骤
+
+1. 创建构建目录
+```bash
 mkdir build
 cd build
+```
+
+2. 使用CMake生成Makefile
+```bash
 cmake ..
+```
+
+3. 编译项目
+```bash
 make
-得到执行文件
-tc_http_server
+```
 
+4. 编译完成后，生成可执行文件`tc_http_server`
 
-需要将修改的tc_http_server.conf的拷贝到执行目录。
+### 配置
 
-v0.2 tuchuang-2
-目前该版本为单线程版本，日志也直接打印到控制台，随着课程会不断迭代。
+1. 将`tc_http_server.conf`配置文件复制到执行目录
+2. 根据实际环境修改配置文件中的以下参数：
+   - 数据库连接信息（主机、端口、用户名、密码等）
+   - Redis连接信息
+   - FastDFS配置路径
+   - 服务器监听IP和端口
+   - 线程数量
 
+### 运行
 
-v0.3 tuchuang-3
-1. 日志异步处理
-2. 文件数量 计数采用redis
-3. 使用c++11线程池处理，目前只是小部分函数使用了多线程处理
-4. 数据回发
-5. 修复一些bug
+```bash
+./tc_http_server
+```
+
+## API接口
+
+系统提供RESTful API接口，主要接口包括：
+
+### 用户相关
+- `POST /api/reg` - 用户注册
+- `POST /api/login` - 用户登录
+
+### 文件相关
+- `POST /api/upload` - 文件上传
+- `GET /api/myfiles` - 获取用户文件列表
+- `POST /api/dealfile` - 文件处理（删除等）
+
+### 分享相关
+- `POST /api/sharefiles` - 分享文件
+- `GET /api/sharefiles` - 获取分享文件列表
+
+## 版本历史
+
+- **v0.2 (tuchuang-2)**：初始版本，采用单线程设计，日志直接输出到控制台
+- **v0.3 (tuchuang-3)**：
+  1. 实现日志异步处理
+  2. 使用Redis进行文件计数
+  3. 引入C++11线程池（部分功能已实现多线程处理）
+  4. 实现数据回发功能
+  5. 修复若干bug
+
+## 开发与贡献
+
+欢迎提交Issue和Pull Request来改进项目。
+
+## 许可证
+
+本项目采用MIT许可证，详情请参见LICENSE文件。

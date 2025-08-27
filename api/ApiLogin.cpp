@@ -92,8 +92,9 @@ int verifyUserPassword(string &user_name, string &pwd)
     {
         // 存在在返回
         string password = pResultSet->GetString("password");
-        LOG_INFO << "mysql-pwd: " << password << ", user-pwd: " << pwd;
-        if (pResultSet->GetString("password") == pwd)
+        // 前端已经对密码进行了MD5加密，直接比较
+        LOG_INFO << "mysql-pwd: " << password << ", user-pwd-md5: " << pwd;
+        if (password == pwd)
             ret = 0;
         else
             ret = -1;

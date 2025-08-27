@@ -133,9 +133,11 @@ int registerUser(string &user_name, string &nick_name, string &pwd, string &phon
         {
             uint32_t index = 0;
             string c_time = create_time;
+            // 前端已经对密码进行了MD5加密，直接存储
+            LOG_INFO << "存储密码(MD5): " << pwd;
             stmt->SetParam(index++, user_name);
             stmt->SetParam(index++, nick_name);
-            stmt->SetParam(index++, pwd);
+            stmt->SetParam(index++, pwd); // 存储前端发送的MD5加密密码
             stmt->SetParam(index++, phone);
             stmt->SetParam(index++, email);
             stmt->SetParam(index++, c_time);
