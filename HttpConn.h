@@ -1,3 +1,4 @@
+
 /*
  * HttpConn.h
  *
@@ -19,11 +20,13 @@
 #define READ_BUF_SIZE	2048
 
 
-#define HTTP_RESPONSE_HTML          "HTTP/1.1 200 OK\r\n"\
-                                    "Connection:close\r\n"\
-                                    "Content-Length:%d\r\n"\
-                                    "Content-Type:application/json;charset=utf-8\r\n\r\n%s"
-                                    
+#define HTTP_RESPONSE_HTML          "HTTP/1.1 200 OK
+"                                    "Connection:close
+"                                    "Content-Length:%d
+"                                    "Content-Type:application/json;charset=utf-8
+
+%s"
+
 #define HTTP_RESPONSE_HTML_MAX      4096
 
 
@@ -69,18 +72,40 @@ private:
     int _HandleRegisterRequest(string& url, string& post_data);
     // 账号登陆处理
     int _HandleLoginRequest(string& url, string& post_data);
-    //  
+    //
     int _HandleDealfileRequest(string& url, string& post_data);
-    // 
+    //
     int _HandleDealsharefileRequest(string& url, string& post_data);
     //
     int _HandleMd5Request(string& url, string& post_data);
-    // 
+    //
     int _HandleMyfilesRequest(string& url, string& post_data);
-    // 
+    //
     int _HandleSharefilesRequest(string& url, string& post_data);
-    // 
+    //
     int _HandleSharepictureRequest(string& url, string& post_data);
+    //
+    int _HandleGetUserFoldersRequest(string& url, string& post_data);
+    //
+    int _HandleCreateFolderRequest(string& url, string& post_data);
+    //
+    int _HandleUpdateFolderNameRequest(string& url, string& post_data);
+    //
+    int _HandleDeleteFolderRequest(string& url, string& post_data);
+    //
+    int _HandleMoveFolderRequest(string& url, string& post_data);
+    //
+    int _HandleGetFolderFilesRequest(string& url, string& post_data);
+    //
+    int _HandleMoveFileToFolderRequest(string& url, string& post_data);
+    //
+    int _HandleBatchMoveFilesToFolderRequest(string& url, string& post_data);
+    //
+    int _HandleBatchDeleteFilesRequest(string& url, string& post_data);
+    //
+    int _HandleBatchShareFilesRequest(string& url, string& post_data);
+    //
+    int _HandleBatchUploadFilesToFolderRequest(string& url, string& post_data);
 protected:
 	net_handle_t	m_sock_handle;
 	uint32_t		m_conn_handle;
@@ -94,7 +119,7 @@ protected:
 
 	uint64_t		m_last_send_tick;
 	uint64_t		m_last_recv_tick;
-    
+
     CHttpParserWrapper m_cHttpParser;
 
     static uint32_t	s_uuid_alloctor;  // uuid分配
