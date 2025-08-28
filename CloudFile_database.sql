@@ -2,11 +2,11 @@
 # 包含基础表结构和文件夹管理功能
 
 # 创建数据库
-DROP DATABASE IF EXISTS `Cloud_File`;
-CREATE DATABASE `Cloud_File`;
+DROP DATABASE IF EXISTS `0voice_tuchuang`;
+CREATE DATABASE `0voice_tuchuang`;
 
 # 使用数据库
-USE `Cloud_File`;
+USE `0voice_tuchuang`;
 
 # 文件信息表
 DROP TABLE IF EXISTS `file_info`;
