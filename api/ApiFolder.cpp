@@ -145,7 +145,7 @@ int getUserFolders(const std::string &user, std::string &str_json)
     // 构建树形结构
     for (std::map<int, Json::Value>::iterator it = folder_map.begin(); it != folder_map.end(); ++it)
     {
-        int folder_id = it->first;
+        // int folder_id = it->first; // 不使用的变量
         Json::Value &folder = it->second;
         int parent_id = folder["parent_id"].asInt();
         
@@ -194,7 +194,7 @@ int createFolder(const std::string &user, const std::string &folder_name, int pa
 
     // 获取用户ID
     sprintf(sql_cmd, "SELECT id FROM user_info WHERE user_name='%s'", user.c_str());
-    CResultSet *pResultSet = pDBConn->ExecuteQuery(sql_cmd);
+    pResultSet = pDBConn->ExecuteQuery(sql_cmd);
     if (pResultSet && pResultSet->Next())
     {
         user_id = pResultSet->GetInt("id");
@@ -273,7 +273,7 @@ int updateFolderName(const std::string &user, int folder_id, const std::string &
 
     // 获取用户ID
     sprintf(sql_cmd, "SELECT id FROM user_info WHERE user_name='%s'", user.c_str());
-    CResultSet *pResultSet = pDBConn->ExecuteQuery(sql_cmd);
+    pResultSet = pDBConn->ExecuteQuery(sql_cmd);
     if (pResultSet && pResultSet->Next())
     {
         user_id = pResultSet->GetInt("id");
@@ -346,7 +346,7 @@ int deleteFolder(const std::string &user, int folder_id, std::string &str_json)
 
     // 获取用户ID
     sprintf(sql_cmd, "SELECT id FROM user_info WHERE user_name='%s'", user.c_str());
-    CResultSet *pResultSet = pDBConn->ExecuteQuery(sql_cmd);
+    pResultSet = pDBConn->ExecuteQuery(sql_cmd);
     if (pResultSet && pResultSet->Next())
     {
         user_id = pResultSet->GetInt("id");
@@ -437,9 +437,8 @@ int moveFolder(const std::string &user, int folder_id, int new_parent_id, std::s
     Json::FastWriter writer;
 
     // 获取用户ID
-    char sql_cmd[SQL_MAX_LEN] = {0};
     sprintf(sql_cmd, "SELECT id FROM user_info WHERE user_name='%s'", user.c_str());
-    CResultSet *pResultSet = pDBConn->ExecuteQuery(sql_cmd);
+    pResultSet = pDBConn->ExecuteQuery(sql_cmd);
     if (pResultSet && pResultSet->Next())
     {
         user_id = pResultSet->GetInt("id");
@@ -542,10 +541,16 @@ int getFolderFiles(const std::string &user, int folder_id, std::string &str_json
     CDBConn *pDBConn = pDBManager->GetDBConn("tuchuang_slave");
     AUTO_REL_DBCONN(pDBManager, pDBConn);
 
-    // 获取用户ID
+    // 提前初始化所有变量，避免goto跨越初始化
     char sql_cmd[SQL_MAX_LEN] = {0};
+    CResultSet *pResultSet = NULL;
+    Json::Value root;
+    Json::Value file_array(Json::arrayValue);
+    Json::FastWriter writer;
+
+    // 获取用户ID
     sprintf(sql_cmd, "SELECT id FROM user_info WHERE user_name='%s'", user.c_str());
-    CResultSet *pResultSet = pDBConn->ExecuteQuery(sql_cmd);
+    pResultSet = pDBConn->ExecuteQuery(sql_cmd);
     if (pResultSet && pResultSet->Next())
     {
         user_id = pResultSet->GetInt("id");
@@ -582,8 +587,7 @@ int getFolderFiles(const std::string &user, int folder_id, std::string &str_json
         goto END;
     }
 
-    Json::Value root;
-    Json::Value file_array(Json::arrayValue);
+    file_array = Json::Value(Json::arrayValue);
     while (pResultSet->Next())
     {
         Json::Value file;
@@ -599,7 +603,6 @@ int getFolderFiles(const std::string &user, int folder_id, std::string &str_json
     root["files"] = file_array;
     delete pResultSet;
 
-    Json::FastWriter writer;
     str_json = writer.write(root);
 
 END:
