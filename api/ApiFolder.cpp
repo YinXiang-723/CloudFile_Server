@@ -79,11 +79,19 @@ int getUserFolders(const std::string &user, std::string &str_json)
     CDBManager *pDBManager = CDBManager::getInstance();
     CDBConn *pDBConn = pDBManager->GetDBConn("tuchuang_slave");
     AUTO_REL_DBCONN(pDBManager, pDBConn);
+    
+    // 提前初始化所有变量，避免goto跨越初始化
+    char sql_cmd[SQL_MAX_LEN] = {0};
+    CResultSet *pResultSet = NULL;
+    Json::Value root;
+    Json::Value folder_tree;
+    Json::Value root_folder;
+    std::map<int, Json::Value> folder_map;
+    Json::FastWriter writer;
 
     // 获取用户ID
-    char sql_cmd[SQL_MAX_LEN] = {0};
     sprintf(sql_cmd, "SELECT id FROM user_info WHERE user_name='%s'", user.c_str());
-    CResultSet *pResultSet = pDBConn->ExecuteQuery(sql_cmd);
+    pResultSet = pDBConn->ExecuteQuery(sql_cmd);
     if (pResultSet && pResultSet->Next())
     {
         user_id = pResultSet->GetInt("id");
@@ -105,13 +113,8 @@ int getUserFolders(const std::string &user, std::string &str_json)
         ret = -1;
         goto END;
     }
-
-    // 构建文件夹树
-    Json::Value root;
-    Json::Value folder_tree;
     
     // 创建根节点
-    Json::Value root_folder;
     root_folder["id"] = 0;
     root_folder["parent_id"] = -1; // 根节点的父ID设为-1
     root_folder["folder_name"] = "我的文件";
@@ -120,8 +123,6 @@ int getUserFolders(const std::string &user, std::string &str_json)
     root_folder["children"] = Json::Value(Json::arrayValue);
     folder_tree.append(root_folder);
     
-    // 创建文件夹ID到节点的映射
-    std::map<int, Json::Value> folder_map;
     
     // 添加所有文件夹到映射
     while (pResultSet->Next())
@@ -169,7 +170,6 @@ int getUserFolders(const std::string &user, std::string &str_json)
     root["code"] = 0;
     root["folders"] = folder_tree;
     
-    Json::FastWriter writer;
     str_json = writer.write(root);
 
 END:
