@@ -433,6 +433,8 @@ int moveFolder(const std::string &user, int folder_id, int new_parent_id, std::s
     char sql_cmd[SQL_MAX_LEN] = {0};
     CResultSet *pResultSet = NULL;
     int old_parent_id = 0;
+    int check_id = 0;
+    int check_parent_id = 0;
     Json::Value root;
     Json::FastWriter writer;
 
@@ -460,7 +462,7 @@ int moveFolder(const std::string &user, int folder_id, int new_parent_id, std::s
         ret = -2; // 文件夹不存在或不属于该用户
         goto END;
     }
-    int old_parent_id = pResultSet->GetInt("parent_id");
+    old_parent_id = pResultSet->GetInt("parent_id");
     delete pResultSet;
 
     // 如果目标父文件夹与当前相同，则无需移动
@@ -488,7 +490,7 @@ int moveFolder(const std::string &user, int folder_id, int new_parent_id, std::s
     // 检查移动是否会造成循环引用（将文件夹移动到自己的子文件夹中）
     if (new_parent_id > 0)
     {
-        int check_id = new_parent_id;
+        check_id = new_parent_id;
         while (check_id > 0)
         {
             sprintf(sql_cmd, "SELECT parent_id FROM folders WHERE id=%d AND is_deleted=0", check_id);
@@ -497,7 +499,7 @@ int moveFolder(const std::string &user, int folder_id, int new_parent_id, std::s
             {
                 break;
             }
-            int check_parent_id = pResultSet->GetInt("parent_id");
+            check_parent_id = pResultSet->GetInt("parent_id");
             delete pResultSet;
 
             if (check_parent_id == folder_id)
@@ -523,9 +525,7 @@ int moveFolder(const std::string &user, int folder_id, int new_parent_id, std::s
     LOG_INFO << "move folder success: " << folder_id << " from " << old_parent_id << " to " << new_parent_id;
 
     // 返回成功响应
-    Json::Value root;
     root["code"] = 0;
-    Json::FastWriter writer;
     str_json = writer.write(root);
 
 END:
