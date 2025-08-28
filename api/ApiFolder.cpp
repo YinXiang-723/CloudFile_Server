@@ -185,8 +185,14 @@ int createFolder(const std::string &user, const std::string &folder_name, int pa
     CDBConn *pDBConn = pDBManager->GetDBConn("tuchuang_slave");
     AUTO_REL_DBCONN(pDBManager, pDBConn);
 
-    // 获取用户ID
+    // 提前初始化所有变量，避免goto跨越初始化
     char sql_cmd[SQL_MAX_LEN] = {0};
+    CResultSet *pResultSet = NULL;
+    int new_folder_id = 0;
+    Json::Value root;
+    Json::FastWriter writer;
+
+    // 获取用户ID
     sprintf(sql_cmd, "SELECT id FROM user_info WHERE user_name='%s'", user.c_str());
     CResultSet *pResultSet = pDBConn->ExecuteQuery(sql_cmd);
     if (pResultSet && pResultSet->Next())
@@ -238,14 +244,12 @@ int createFolder(const std::string &user, const std::string &folder_name, int pa
     }
 
     // 获取新创建的文件夹ID
-    int new_folder_id = pDBConn->GetInsertId();
+    new_folder_id = pDBConn->GetInsertId();
     LOG_INFO << "create folder success: " << new_folder_id;
 
     // 返回成功响应
-    Json::Value root;
     root["code"] = 0;
     root["folder_id"] = new_folder_id;
-    Json::FastWriter writer;
     str_json = writer.write(root);
 
 END:
@@ -261,8 +265,13 @@ int updateFolderName(const std::string &user, int folder_id, const std::string &
     CDBConn *pDBConn = pDBManager->GetDBConn("tuchuang_slave");
     AUTO_REL_DBCONN(pDBManager, pDBConn);
 
-    // 获取用户ID
+    // 提前初始化所有变量，避免goto跨越初始化
     char sql_cmd[SQL_MAX_LEN] = {0};
+    CResultSet *pResultSet = NULL;
+    Json::Value root;
+    Json::FastWriter writer;
+
+    // 获取用户ID
     sprintf(sql_cmd, "SELECT id FROM user_info WHERE user_name='%s'", user.c_str());
     CResultSet *pResultSet = pDBConn->ExecuteQuery(sql_cmd);
     if (pResultSet && pResultSet->Next())
@@ -312,9 +321,7 @@ int updateFolderName(const std::string &user, int folder_id, const std::string &
     LOG_INFO << "update folder name success: " << folder_id << " -> " << new_name;
 
     // 返回成功响应
-    Json::Value root;
     root["code"] = 0;
-    Json::FastWriter writer;
     str_json = writer.write(root);
 
 END:
@@ -330,8 +337,14 @@ int deleteFolder(const std::string &user, int folder_id, std::string &str_json)
     CDBConn *pDBConn = pDBManager->GetDBConn("tuchuang_slave");
     AUTO_REL_DBCONN(pDBManager, pDBConn);
 
-    // 获取用户ID
+    // 提前初始化所有变量，避免goto跨越初始化
     char sql_cmd[SQL_MAX_LEN] = {0};
+    CResultSet *pResultSet = NULL;
+    int parent_id = 0;
+    Json::Value root;
+    Json::FastWriter writer;
+
+    // 获取用户ID
     sprintf(sql_cmd, "SELECT id FROM user_info WHERE user_name='%s'", user.c_str());
     CResultSet *pResultSet = pDBConn->ExecuteQuery(sql_cmd);
     if (pResultSet && pResultSet->Next())
@@ -355,7 +368,7 @@ int deleteFolder(const std::string &user, int folder_id, std::string &str_json)
         ret = -2; // 文件夹不存在或不属于该用户
         goto END;
     }
-    int parent_id = pResultSet->GetInt("parent_id");
+    parent_id = pResultSet->GetInt("parent_id");
     delete pResultSet;
 
     // 检查是否为根文件夹
@@ -400,9 +413,7 @@ int deleteFolder(const std::string &user, int folder_id, std::string &str_json)
     LOG_INFO << "delete folder success: " << folder_id;
 
     // 返回成功响应
-    Json::Value root;
     root["code"] = 0;
-    Json::FastWriter writer;
     str_json = writer.write(root);
 
 END:
@@ -417,6 +428,13 @@ int moveFolder(const std::string &user, int folder_id, int new_parent_id, std::s
     CDBManager *pDBManager = CDBManager::getInstance();
     CDBConn *pDBConn = pDBManager->GetDBConn("tuchuang_slave");
     AUTO_REL_DBCONN(pDBManager, pDBConn);
+
+    // 提前初始化所有变量，避免goto跨越初始化
+    char sql_cmd[SQL_MAX_LEN] = {0};
+    CResultSet *pResultSet = NULL;
+    int old_parent_id = 0;
+    Json::Value root;
+    Json::FastWriter writer;
 
     // 获取用户ID
     char sql_cmd[SQL_MAX_LEN] = {0};
