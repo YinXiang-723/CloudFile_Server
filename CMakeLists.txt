@@ -26,7 +26,7 @@ INCLUDE_DIRECTORIES(/usr/include/fastdfs /usr/include/fastcommon
                     /usr/local/include/hiredis /usr/include/mysql
                     /usr/local/include)
 INCLUDE_DIRECTORIES(./ ./include)
-INCLUDE_DIRECTORIES(./jsoncpp/include)
+INCLUDE_DIRECTORIES(./jsoncpp)
 INCLUDE_DIRECTORIES(./mysql)
 INCLUDE_DIRECTORIES(./redis)
 INCLUDE_DIRECTORIES(./base)
