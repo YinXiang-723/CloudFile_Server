@@ -1,4 +1,3 @@
-
 /*
  * HttpConn.h
  *
@@ -20,13 +19,11 @@
 #define READ_BUF_SIZE	2048
 
 
-#define HTTP_RESPONSE_HTML          "HTTP/1.1 200 OK
-"                                    "Connection:close
-"                                    "Content-Length:%d
-"                                    "Content-Type:application/json;charset=utf-8
-
-%s"
-
+#define HTTP_RESPONSE_HTML          "HTTP/1.1 200 OK\r\n"\
+                                    "Connection:close\r\n"\
+                                    "Content-Length:%d\r\n"\
+                                    "Content-Type:application/json;charset=utf-8\r\n\r\n%s"
+                                    
 #define HTTP_RESPONSE_HTML_MAX      4096
 
 
