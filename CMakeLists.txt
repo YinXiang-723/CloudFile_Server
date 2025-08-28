@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.5)
 PROJECT(tc_http_server)
 
 # 设置C++标准
