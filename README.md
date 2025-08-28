@@ -8,7 +8,8 @@
 
 - **用户认证与管理**：支持用户注册、登录和个人信息管理
 - **文件上传与存储**：支持多种格式文件上传，使用FastDFS进行分布式存储
-- **文件管理**：用户可以查看、删除个人上传的文件
+- **文件夹管理**：支持创建、重命名、删除和移动文件夹，实现文件的分类管理
+- **文件管理**：用户可以查看、删除个人上传的文件，并将文件移动到不同文件夹
 - **文件分享**：生成分享链接和提取码，实现文件的安全分享
 - **下载统计**：记录和展示文件下载次数，提供热门文件排行榜
 - **缓存管理**：使用Redis进行缓存优化，提高系统性能
@@ -40,6 +41,12 @@
 CloudFile_Server/
 ├── api/                  # API处理模块
 │   ├── ApiCommon.h/cpp   # 公共API函数
+│   ├── ApiFolder.h/cpp    # 文件夹管理API
+│   ├── ApiFolderHandler.h/cpp # 文件夹管理API处理
+│   ├── ApiFileMove.h/cpp # 文件移动API
+│   ├── ApiFileMoveHandler.h/cpp # 文件移动API处理
+│   ├── ApiBatchOperation.h/cpp # 批量操作API
+│   ├── ApiBatchOperationHandler.h/cpp # 批量操作API处理
 │   ├── ApiLogin.h/cpp    # 用户登录API
 │   ├── ApiRegister.h/cpp # 用户注册API
 │   ├── ApiUpload.h/cpp   # 文件上传API
@@ -76,10 +83,12 @@ CloudFile_Server/
 
 1. **user_info**：用户信息表，存储用户名、昵称、密码等基本信息
 2. **file_info**：文件信息表，存储文件的MD5、ID、URL、大小、类型等信息
-3. **user_file_list**：用户文件列表，记录用户拥有的文件
+3. **user_file_list**：用户文件列表，记录用户拥有的文件及其所属文件夹
 4. **user_file_count**：用户文件计数表，统计用户拥有的文件数量
 5. **share_file_list**：共享文件列表，记录被用户分享的文件
 6. **share_picture_list**：分享图片列表，记录图片分享信息，包含提取码
+7. **folders**：文件夹表，存储用户创建的文件夹信息
+8. **file_folder_relations**：文件与文件夹关联表，记录文件与文件夹的关联关系
 
 ## 编译与安装
 
@@ -139,10 +148,25 @@ make
 - `POST /api/upload` - 文件上传
 - `GET /api/myfiles` - 获取用户文件列表
 - `POST /api/dealfile` - 文件处理（删除等）
+- `POST /api/filemove?cmd=single` - 移动单个文件到文件夹
+- `POST /api/filemove?cmd=batch` - 批量移动文件到文件夹
+- `POST /api/batchoperation` - 批量操作（删除、分享等）
+
+### 文件夹相关
+- `POST /api/folders` - 获取用户文件夹列表
+- `POST /api/folders?cmd=create` - 创建文件夹
+- `POST /api/folders?cmd=update` - 更新文件夹名称
+- `POST /api/folders?cmd=delete` - 删除文件夹
+- `POST /api/folders?cmd=move` - 移动文件夹
+- `POST /api/folderfiles` - 获取文件夹中的文件列表
 
 ### 分享相关
 - `POST /api/sharefiles` - 分享文件
 - `GET /api/sharefiles` - 获取分享文件列表
+- `GET /api/sharefiles/{code}` - 通过提取码获取分享文件
+
+### 批量操作
+- `POST /api/batchoperation` - 批量操作（支持批量删除、分享等）
 
 ## 版本历史
 
@@ -153,6 +177,15 @@ make
   3. 引入C++11线程池（部分功能已实现多线程处理）
   4. 实现数据回发功能
   5. 修复若干bug
+
+- **v0.4 (tuchuang-4)**：
+  1. 添加文件夹管理功能，支持创建、重命名、删除和移动文件夹
+  2. 修改文件上传逻辑，支持文件与文件夹的关联
+  3. 新增文件夹相关API接口
+  4. 优化数据库结构，添加文件夹相关表
+  5. 添加文件移动功能，支持单个和批量移动文件到指定文件夹
+  6. 优化文件夹树形结构查询，返回树形结构的文件夹数据
+  7. 添加批量操作功能，支持批量删除、分享和上传文件
 
 ## 开发与贡献
 

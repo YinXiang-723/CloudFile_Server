@@ -269,6 +269,74 @@ void CHttpConn::OnRead() // CHttpConn业务层面的OnRead
 		{ // 上传
 			_HandleUploadRequest(url, content);
 		}
+		else if (strncmp(url.c_str(), "/api/folders", 12) == 0)
+		{ // 文件夹管理
+			if (strncmp(url.c_str(), "/api/folders", 12) == 0)
+			{ // 获取用户文件夹列表
+				_HandleGetUserFoldersRequest(url, content);
+			}
+			else if (strncmp(url.c_str(), "/api/folders", 12) == 0)
+			{ // 创建文件夹
+				_HandleCreateFolderRequest(url, content);
+			}
+			else if (strncmp(url.c_str(), "/api/folders", 12) == 0)
+			{ // 更新文件夹名称
+				_HandleUpdateFolderNameRequest(url, content);
+			}
+			else if (strncmp(url.c_str(), "/api/folders", 12) == 0)
+			{ // 删除文件夹
+				_HandleDeleteFolderRequest(url, content);
+			}
+			else if (strncmp(url.c_str(), "/api/folders", 12) == 0)
+			{ // 移动文件夹
+				_HandleMoveFolderRequest(url, content);
+			}
+			else if (strncmp(url.c_str(), "/api/folderfiles", 16) == 0)
+			{ // 获取文件夹中的文件列表
+				_HandleGetFolderFilesRequest(url, content);
+			}
+			else
+			{
+				LOG_ERROR << "unknown folder operation, url= " << url;
+				Close();
+			}
+		}
+		else if (strncmp(url.c_str(), "/api/filemove", 13) == 0)
+		{ // 文件移动
+			if (strncmp(url.c_str(), "/api/filemove?cmd=single&", 25) == 0)
+			{ // 移动单个文件
+				_HandleMoveFileToFolderRequest(url, content);
+			}
+			else if (strncmp(url.c_str(), "/api/filemove?cmd=batch&", 24) == 0)
+			{ // 批量移动文件
+				_HandleBatchMoveFilesToFolderRequest(url, content);
+			}
+			else
+			{
+				LOG_ERROR << "unknown file move operation, url= " << url;
+				Close();
+			}
+		}
+		else if (strncmp(url.c_str(), "/api/batch", 10) == 0)
+		{ // 批量操作
+			if (strncmp(url.c_str(), "/api/batch?cmd=delete&", 21) == 0)
+			{ // 批量删除文件
+				_HandleBatchDeleteFilesRequest(url, content);
+			}
+			else if (strncmp(url.c_str(), "/api/batch?cmd=share&", 21) == 0)
+			{ // 批量分享文件
+				_HandleBatchShareFilesRequest(url, content);
+			}
+			else if (strncmp(url.c_str(), "/api/batch?cmd=upload&", 21) == 0)
+			{ // 批量上传文件到文件夹
+				_HandleBatchUploadFilesToFolderRequest(url, content);
+			}
+			else
+			{
+				LOG_ERROR << "unknown batch operation, url= " << url;
+				Close();
+			}
+		}
 		else
 		{
 			LOG_ERROR << "url unknown, url= " << url;
@@ -524,4 +592,147 @@ void CHttpConn::SendResponseDataList()
 	}
 
 	s_resp_mutex.unlock();
+}
+
+// 处理获取用户文件夹列表请求
+int CHttpConn::_HandleGetUserFoldersRequest(string &url, string &post_data)
+{
+	string str_json;
+	int ret = handleGetUserFolders(url, post_data, str_json);
+	char *szContent = new char[HTTP_RESPONSE_HTML_MAX];
+	uint32_t nLen = str_json.length();
+	snprintf(szContent, HTTP_RESPONSE_HTML_MAX, HTTP_RESPONSE_HTML, nLen, str_json.c_str());
+	ret = Send((void *)szContent, strlen(szContent));
+	delete [] szContent;
+	return 0;
+}
+
+// 处理创建文件夹请求
+int CHttpConn::_HandleCreateFolderRequest(string &url, string &post_data)
+{
+	string str_json;
+	int ret = handleCreateFolder(url, post_data, str_json);
+	char *szContent = new char[HTTP_RESPONSE_HTML_MAX];
+	uint32_t nLen = str_json.length();
+	snprintf(szContent, HTTP_RESPONSE_HTML_MAX, HTTP_RESPONSE_HTML, nLen, str_json.c_str());
+	ret = Send((void *)szContent, strlen(szContent));
+	delete [] szContent;
+	return 0;
+}
+
+// 处理更新文件夹名称请求
+int CHttpConn::_HandleUpdateFolderNameRequest(string &url, string &post_data)
+{
+	string str_json;
+	int ret = handleUpdateFolderName(url, post_data, str_json);
+	char *szContent = new char[HTTP_RESPONSE_HTML_MAX];
+	uint32_t nLen = str_json.length();
+	snprintf(szContent, HTTP_RESPONSE_HTML_MAX, HTTP_RESPONSE_HTML, nLen, str_json.c_str());
+	ret = Send((void *)szContent, strlen(szContent));
+	delete [] szContent;
+	return 0;
+}
+
+// 处理删除文件夹请求
+int CHttpConn::_HandleDeleteFolderRequest(string &url, string &post_data)
+{
+	string str_json;
+	int ret = handleDeleteFolder(url, post_data, str_json);
+	char *szContent = new char[HTTP_RESPONSE_HTML_MAX];
+	uint32_t nLen = str_json.length();
+	snprintf(szContent, HTTP_RESPONSE_HTML_MAX, HTTP_RESPONSE_HTML, nLen, str_json.c_str());
+	ret = Send((void *)szContent, strlen(szContent));
+	delete [] szContent;
+	return 0;
+}
+
+// 处理移动文件夹请求
+int CHttpConn::_HandleMoveFolderRequest(string &url, string &post_data)
+{
+	string str_json;
+	int ret = handleMoveFolder(url, post_data, str_json);
+	char *szContent = new char[HTTP_RESPONSE_HTML_MAX];
+	uint32_t nLen = str_json.length();
+	snprintf(szContent, HTTP_RESPONSE_HTML_MAX, HTTP_RESPONSE_HTML, nLen, str_json.c_str());
+	ret = Send((void *)szContent, strlen(szContent));
+	delete [] szContent;
+	return 0;
+}
+
+// 处理获取文件夹中的文件列表请求
+int CHttpConn::_HandleGetFolderFilesRequest(string &url, string &post_data)
+{
+	string str_json;
+	int ret = handleGetFolderFiles(url, post_data, str_json);
+	char *szContent = new char[HTTP_RESPONSE_HTML_MAX];
+	uint32_t nLen = str_json.length();
+	snprintf(szContent, HTTP_RESPONSE_HTML_MAX, HTTP_RESPONSE_HTML, nLen, str_json.c_str());
+	ret = Send((void *)szContent, strlen(szContent));
+	delete [] szContent;
+	return 0;
+}
+
+// 处理移动单个文件到文件夹请求
+int CHttpConn::_HandleMoveFileToFolderRequest(string &url, string &post_data)
+{
+	string str_json;
+	int ret = handleMoveFileToFolder(url, post_data, str_json);
+	char *szContent = new char[HTTP_RESPONSE_HTML_MAX];
+	uint32_t nLen = str_json.length();
+	snprintf(szContent, HTTP_RESPONSE_HTML_MAX, HTTP_RESPONSE_HTML, nLen, str_json.c_str());
+	ret = Send((void *)szContent, strlen(szContent));
+	delete [] szContent;
+	return 0;
+}
+
+// 处理批量移动文件到文件夹请求
+int CHttpConn::_HandleBatchMoveFilesToFolderRequest(string &url, string &post_data)
+{
+	string str_json;
+	int ret = handleBatchMoveFilesToFolder(url, post_data, str_json);
+	char *szContent = new char[HTTP_RESPONSE_HTML_MAX];
+	uint32_t nLen = str_json.length();
+	snprintf(szContent, HTTP_RESPONSE_HTML_MAX, HTTP_RESPONSE_HTML, nLen, str_json.c_str());
+	ret = Send((void *)szContent, strlen(szContent));
+	delete [] szContent;
+	return 0;
+}
+
+// 处理批量删除文件请求
+int CHttpConn::_HandleBatchDeleteFilesRequest(string &url, string &post_data)
+{
+	string str_json;
+	int ret = handleBatchDeleteFiles(url, post_data, str_json);
+	char *szContent = new char[HTTP_RESPONSE_HTML_MAX];
+	uint32_t nLen = str_json.length();
+	snprintf(szContent, HTTP_RESPONSE_HTML_MAX, HTTP_RESPONSE_HTML, nLen, str_json.c_str());
+	ret = Send((void *)szContent, strlen(szContent));
+	delete [] szContent;
+	return 0;
+}
+
+// 处理批量分享文件请求
+int CHttpConn::_HandleBatchShareFilesRequest(string &url, string &post_data)
+{
+	string str_json;
+	int ret = handleBatchShareFiles(url, post_data, str_json);
+	char *szContent = new char[HTTP_RESPONSE_HTML_MAX];
+	uint32_t nLen = str_json.length();
+	snprintf(szContent, HTTP_RESPONSE_HTML_MAX, HTTP_RESPONSE_HTML, nLen, str_json.c_str());
+	ret = Send((void *)szContent, strlen(szContent));
+	delete [] szContent;
+	return 0;
+}
+
+// 处理批量上传文件到文件夹请求
+int CHttpConn::_HandleBatchUploadFilesToFolderRequest(string &url, string &post_data)
+{
+	string str_json;
+	int ret = handleBatchUploadFilesToFolder(url, post_data, str_json);
+	char *szContent = new char[HTTP_RESPONSE_HTML_MAX];
+	uint32_t nLen = str_json.length();
+	snprintf(szContent, HTTP_RESPONSE_HTML_MAX, HTTP_RESPONSE_HTML, nLen, str_json.c_str());
+	ret = Send((void *)szContent, strlen(szContent));
+	delete [] szContent;
+	return 0;
 }

@@ -190,7 +190,7 @@ END:
     return ret;
 }
 
-int storeFileinfo(CDBConn *pDBConn, CacheConn *pCacheConn, char *user, char *filename, char *md5, long size, char *fileid, char *fdfs_file_url)
+int storeFileinfo(CDBConn *pDBConn, CacheConn *pCacheConn, char *user, char *filename, char *md5, long size, char *fileid, char *fdfs_file_url, int folder_id)
 {
     int ret = 0;
     time_t now;
@@ -231,11 +231,16 @@ int storeFileinfo(CDBConn *pDBConn, CacheConn *pCacheConn, char *user, char *fil
        -- md5 文件md5
        -- create_time 文件创建时间
        -- file_name 文件名字
+       -- folder_id 文件夹ID，默认为NULL（根文件夹）
        -- shared_status 共享状态, 0为没有共享， 1为共享
        -- pv 文件下载量，默认值为0，下载一次加1
        */
     // sql语句
-    sprintf(sql_cmd, "insert into user_file_list(user, md5, create_time, file_name, shared_status, pv) values ('%s', '%s', '%s', '%s', %d, %d)", user, md5, create_time, filename, 0, 0);
+    if (folder_id > 0) {
+        sprintf(sql_cmd, "insert into user_file_list(user, md5, create_time, file_name, folder_id, shared_status, pv) values ('%s', '%s', '%s', '%s', %d, %d, %d)", user, md5, create_time, filename, folder_id, 0, 0);
+    } else {
+        sprintf(sql_cmd, "insert into user_file_list(user, md5, create_time, file_name, folder_id, shared_status, pv) values ('%s', '%s', '%s', '%s', NULL, %d, %d)", user, md5, create_time, filename, 0, 0);
+    }
     LOG_INFO << "执行: " << sql_cmd;
     if (!pDBConn->ExecuteCreate(sql_cmd))
     {
@@ -449,8 +454,29 @@ int ApiUpload(string &url, string &post_data, string &str_json)
 
     //===============> 将该文件的FastDFS相关信息存入mysql中 <======
     LOG_INFO << "storeFileinfo, url: " << fdfs_file_url;
+    
+    // 解析文件夹ID，如果没有指定则为0（根文件夹）
+    int folder_id = 0;
+    char *folder_id_str = strstr(post_data.c_str(), "name=\"folder_id\"");
+    if (folder_id_str)
+    {
+        char *p1 = strstr(folder_id_str, "\r\n");
+        if (p1)
+        {
+            p1 += 4;
+            char *p2 = strstr(p1, "\r\n");
+            if (p2)
+            {
+                char folder_id_value[32] = {0};
+                strncpy(folder_id_value, p1, p2 - p1);
+                folder_id = atoi(folder_id_value);
+                LOG_INFO << "folder_id: " << folder_id;
+            }
+        }
+    }
+    
     // 把文件写入file_info
-    if (storeFileinfo(pDBConn, pCacheConn, user, file_name, file_md5, long_file_size, fileid, fdfs_file_url) < 0)
+    if (storeFileinfo(pDBConn, pCacheConn, user, file_name, file_md5, long_file_size, fileid, fdfs_file_url, folder_id) < 0)
     {
         LOG_ERROR << "storeFileinfo failed ";
         ret = -1;
