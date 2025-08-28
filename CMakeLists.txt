@@ -46,6 +46,4 @@ TARGET_LINK_LIBRARIES(tc_http_server
     fastcommon 
     m 
     mysqlclient 
-    hiredis 
-    jsoncpp
     ${CMAKE_THREAD_LIBS_INIT}) 
