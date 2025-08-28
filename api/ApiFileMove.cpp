@@ -77,13 +77,14 @@ int moveFileToFolder(const std::string &user, const std::string &file_md5, int f
 
     LOG_INFO << "move file to folder success: " << file_md5 << " -> " << folder_id;
 
-    // 返回成功响应
-    Json::Value root;
-    root["code"] = 0;
-    Json::FastWriter writer;
-    str_json = writer.write(root);
-
 END:
+    if (ret == 0) {
+        // 只在成功时返回JSON响应
+        Json::Value root;
+        root["code"] = 0;
+        Json::FastWriter writer;
+        str_json = writer.write(root);
+    }
     return ret;
 }
 

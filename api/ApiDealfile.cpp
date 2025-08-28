@@ -149,7 +149,6 @@ int handleShareFile(string &user, string &md5, string &filename)
     }
 
     time_t now;
-    ;
     char create_time[TIME_STRING_LEN];
     //获取当前时间
     now = time(NULL);
