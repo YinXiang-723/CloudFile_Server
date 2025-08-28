@@ -74,7 +74,7 @@ CloudFile_Server/
 ├── main.cpp              # 主程序入口
 ├── tc_http_server.conf   # 配置文件
 ├── nginx.conf            # Nginx配置文件
-└── 0voice_tuchuang.sql   # 数据库结构文件
+└── Cloud_File.sql   # 数据库结构文件
 ```
 
 ## 数据库设计
