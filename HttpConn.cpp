@@ -19,6 +19,9 @@
 #include "ApiSharepicture.h"
 #include "ApiMd5.h"
 #include "ApiUpload.h"
+#include "ApiFolderHandler.h"
+#include "ApiBatchOperationHandler.h"
+#include "ApiFileMoveHandler.h"
 static HttpConnMap_t g_http_conn_map;
 
 extern string strMsfsUrl;
@@ -65,6 +68,7 @@ void httpconn_callback(void *callback_data, uint8_t msg, uint32_t handle, uint32
 {
 	NOTUSED_ARG(uParam);
 	NOTUSED_ARG(pParam);
+	NOTUSED_ARG(handle);
 
 	// convert void* to uint32_t, oops
 	uint32_t conn_handle = *((uint32_t *)(&callback_data));
@@ -94,6 +98,9 @@ void httpconn_callback(void *callback_data, uint8_t msg, uint32_t handle, uint32
 void http_conn_timer_callback(void *callback_data, uint8_t msg, uint32_t handle, void *pParam)
 {
 	UNUSED(pParam);
+	NOTUSED_ARG(callback_data);
+	NOTUSED_ARG(msg);
+	NOTUSED_ARG(handle);
 	CHttpConn *pConn = NULL;
 	HttpConnMap_t::iterator it, it_old;
 	uint64_t cur_time = GetTickCount();
