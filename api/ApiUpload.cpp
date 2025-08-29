@@ -191,6 +191,7 @@ int storeFileinfo(CDBConn *pDBConn, CacheConn *pCacheConn, const char *user, con
     time_t now;
     struct tm *tm_now;
     int file_info_id = 0;
+    int user_id = 0;
     CResultSet *pResultSet = NULL;
 
     //获取当前时间
@@ -198,9 +199,21 @@ int storeFileinfo(CDBConn *pDBConn, CacheConn *pCacheConn, const char *user, con
     tm_now = localtime(&now);
     strftime(create_time, TIME_STRING_LEN, "%Y-%m-%d %H:%M:%S", tm_now);
 
+    //获取用户ID
+    sprintf(sql_cmd, "SELECT id FROM user_info WHERE user_name='%s'", user);
+    pResultSet = pDBConn->ExecuteQuery(sql_cmd);
+    if (!pResultSet || !pResultSet->Next())
+    {
+        LOG_ERROR << "get user id failed: " << sql_cmd;
+        ret = -1;
+        goto END;
+    }
+    user_id = pResultSet->GetInt("id");
+    delete pResultSet;
+
     //插入文件信息到file_info表
-    sprintf(sql_cmd, "INSERT INTO file_info (md5, file_id, count, create_time) VALUES ('%s', '%s', 1, '%s')",
-            file_md5, fileid, create_time);
+    sprintf(sql_cmd, "INSERT INTO file_info (user_id, folder_id, md5, file_id, url, file_name, size, type, count, create_time) VALUES (%d, %d, '%s', '%s', '%s', '%s', %ld, '%s', 1, '%s')",
+            user_id, folder_id, file_md5, fileid, fdfs_file_url, file_name, file_size, get_file_type(file_name), create_time);
     if (!pDBConn->ExecuteCreate(sql_cmd))
     {
         LOG_ERROR << "insert file_info failed: " << sql_cmd;
@@ -220,14 +233,12 @@ int storeFileinfo(CDBConn *pDBConn, CacheConn *pCacheConn, const char *user, con
     file_info_id = pResultSet->GetInt("id");
     delete pResultSet;
 
-    //插入用户文件列表
-    sprintf(sql_cmd, "INSERT INTO user_file_list (user, file_name, md5, file_info_id, create_time, file_size, shared_status, pv, folder_id) VALUES ('%s', '%s', '%s', %d, '%s', %ld, 0, 0, %d)",
-            user, file_name, file_md5, file_info_id, create_time, file_size, folder_id);
+    //更新用户文件数量
+    sprintf(sql_cmd, "INSERT INTO user_file_count (user_id, file_count, folder_count) VALUES (%d, 1, 0) ON DUPLICATE KEY UPDATE file_count = file_count + 1", user_id);
     if (!pDBConn->ExecuteCreate(sql_cmd))
     {
-        LOG_ERROR << "insert user_file_list failed: " << sql_cmd;
-        ret = -1;
-        goto END;
+        LOG_ERROR << "update user file count failed: " << sql_cmd;
+        // 不影响主要功能，仅记录错误
     }
 
 END:
@@ -406,22 +417,10 @@ int ApiUpload(string &url, string &post_data, string &str_json)
         ret = -1;
         goto END;
     }
-    p2 = strstr(p2, "\n");
-    if (!p2)
-    {
-        LOG_ERROR << "wrong user format!";
-        ret = -1;
-        goto END;
-    }
+    p2 = strstr(p2, "\r\n");
     p2 += 4;
     begin = p2;
-    p2 = strstr(begin, "\n");
-    if (!p2)
-    {
-        LOG_ERROR << "wrong user format!";
-        ret = -1;
-        goto END;
-    }
+    p2 = strstr(begin, "\r\n");
     strncpy(user, begin, p2 - begin);
     user[p2 - begin] = '\0'; // 确保字符串正确终止
     LOG_INFO << "user: " << user;
