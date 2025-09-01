@@ -26,4 +26,8 @@ int DBGetUserFilesCountByUsername(CDBConn *pDBConn, string user_name, int &count
 int DBGetShareFilesCount(CDBConn *pDBConn, int &count);
 int DBGetSharePictureCountByUsername(CDBConn *pDBConn, string user_name, int &count);
 int RemoveFileFromFastDfs(const char *fileid);
+
+// 获取文件类型
+const char* get_file_type(const char *file_name);
+
 #endif

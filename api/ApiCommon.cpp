@@ -227,3 +227,80 @@ int RemoveFileFromFastDfs(const char *fileid)
 
     return ret;
 }
+
+// 获取文件类型
+const char* get_file_type(const char *file_name)
+{
+    const char *dot = strrchr(file_name, '.');
+    if (dot == NULL || dot == file_name) {
+        return "unknown"; // 没有扩展名或扩展名为空
+    }
+    
+    // 转换为小写进行比较
+    char ext[16] = {0};
+    int i;
+    for (i = 1; i < 16 && dot[i] != '\0'; i++) {
+        ext[i-1] = tolower(dot[i]);
+    }
+    ext[i-1] = '\0';
+    
+    // 常见图片类型
+    if (strcmp(ext, "jpg") == 0 || strcmp(ext, "jpeg") == 0) {
+        return "image/jpeg";
+    } else if (strcmp(ext, "png") == 0) {
+        return "image/png";
+    } else if (strcmp(ext, "gif") == 0) {
+        return "image/gif";
+    } else if (strcmp(ext, "bmp") == 0) {
+        return "image/bmp";
+    }
+    
+    // 文档类型
+    else if (strcmp(ext, "pdf") == 0) {
+        return "application/pdf";
+    } else if (strcmp(ext, "doc") == 0) {
+        return "application/msword";
+    } else if (strcmp(ext, "docx") == 0) {
+        return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+    } else if (strcmp(ext, "xls") == 0) {
+        return "application/vnd.ms-excel";
+    } else if (strcmp(ext, "xlsx") == 0) {
+        return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+    }
+    
+    // 压缩文件
+    else if (strcmp(ext, "zip") == 0) {
+        return "application/zip";
+    } else if (strcmp(ext, "rar") == 0) {
+        return "application/x-rar-compressed";
+    }
+    
+    // 文本文件
+    else if (strcmp(ext, "txt") == 0) {
+        return "text/plain";
+    } else if (strcmp(ext, "html") == 0 || strcmp(ext, "htm") == 0) {
+        return "text/html";
+    } else if (strcmp(ext, "css") == 0) {
+        return "text/css";
+    } else if (strcmp(ext, "js") == 0) {
+        return "application/javascript";
+    }
+    
+    // 视频文件
+    else if (strcmp(ext, "mp4") == 0) {
+        return "video/mp4";
+    } else if (strcmp(ext, "avi") == 0) {
+        return "video/x-msvideo";
+    } else if (strcmp(ext, "mov") == 0) {
+        return "video/quicktime";
+    }
+    
+    // 音频文件
+    else if (strcmp(ext, "mp3") == 0) {
+        return "audio/mpeg";
+    } else if (strcmp(ext, "wav") == 0) {
+        return "audio/wav";
+    }
+    
+    // 默认返回二进制类型
+    return "application/octet-stream";
