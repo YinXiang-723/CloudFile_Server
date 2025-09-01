@@ -301,6 +301,11 @@ const char* get_file_type(const char *file_name)
     } else if (strcmp(ext, "wav") == 0) {
         return "audio/wav";
     }
+
+    // matlab类型
+    else if (strcmp(ext, "mat") == 0) {
+        return "application/octet-stream";
+    }
     
     // 默认返回二进制类型
     return "application/octet-stream";
