@@ -304,3 +304,4 @@ const char* get_file_type(const char *file_name)
     
     // 默认返回二进制类型
     return "application/octet-stream";
+}
